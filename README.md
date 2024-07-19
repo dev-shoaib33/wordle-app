@@ -1,140 +1,125 @@
-# Wordle Bot Technical Take Home
+# Wordle Solver
 
-Congrats on making it to our technical evaluation!  To help us understand your capabilities and familiarity with the front-end technologies we use, we've put together a fun little project for you - a Wordle Bot.
+This project is a React application designed to assist users in solving the popular word game, Wordle. The application uses an external API to fetch word guesses and provides an interactive interface for users to input clues and receive feedback on their guesses.
 
-Your task is to create a user interface for our Wordle solver API that gives the user recommendations for each guess in solving a Wordle.  If you you aren't familiar with Wordle, you can play a game here: [https://nytimes.com/games/wordle/index.html]([Wordle](https://nytimes.com/games/wordle/index.html)).
+## Features
 
-The user flow is as follows:
-1. The user gets a suggestion from the bot for the initial word to guess.
-2. In a separate tab/window, the user enters the word into their game of Wordle and gets the color-coded clue (green, yellow, and white clues) in response.
-3. The user enters in the clue they received and submits it to the bot.
-4. The bot responds with the next word to guess.
-5. Steps 2-4 are repeated until the all boxes are green (winning the game) or all 6 guess attempts are used (losing the game).
+- Interactive input fields for entering Wordle clues.
+- Automated word suggestion based on user input.
+- Feedback on guesses using color-coded clues (green, yellow, grey).
+- Displays a modal with a congratulatory message when the correct word is guessed.
 
+## Installation
 
+1. Clone the repository:
 
-You'll be expected to build and deploy a working application that uses the API.  This app has been designed to be no more than a few hours from start to finish.  Below are various details that you may find helpful in completing the project.
+    ```bash
+    git clone https://github.com/your-username/wordle-solver.git
+    ```
 
-## Functional Requirements
+2. Navigate to the project directory:
 
-1. Users should see an initial guess loaded from the API.
-2. Users should be able to enter in the puzzle clues back from Wordle, which will provide a new suggestion to the user.
-3. Upon submitting all greens, display a success message to the user and don't show or solicit any more suggestions.
-4. Users should have responsive feedback when the app is interacting with the server.
-    - Loading indicator while fetching the initial guess
-    - When submitting clues to the API, the submit button should be disabled and the user should have a loading indicator.
-5. Errors from the API should be displayed to the end user and handled appropriately.
+    ```bash
+    cd wordle-solver
+    ```
 
+3. Install the dependencies:
 
-## Example Visuals
+    ```bash
+    npm install
+    ```
 
-The goal of this project is to test your capabilities around implementing a web application.  To help, below are some sample visuals to help you understand the requirements.  You are welcome to change the user experience as you see desire so long as it meets the above functional requirements.
+## Usage
 
-### Iterating through the guesses
-<img src="images/wordle-sample.png" height="400" />
+1. Start the development server:
 
-### Completing the puzzle
-<img src="images/wordle-sample-complete.png" height="400" />
+    ```bash
+    npm start
+    ```
 
-### Handling initial load
-<img src="images/wordle-sample-loading.png" height="400" />
+2. Open your browser and navigate to `http://localhost:3000`.
 
-### Handling submission load
-<img src="images/wordle-sample-loading-2.png" height="400" />
+## Deployment
 
-### Error Handling
-<img src="images/wordle-sample-error.png" height="400" />
+The application is deployed and can be accessed at:
 
-## API Details
+[Wordle Solver Application](https://master--wordle-app-0-myapp.netlify.app/)
 
-Endpoint:
-POST https://interviewing.venteur.co/api/wordle
+## Components
 
-This endpoint will return the next guess from the wordle bot based upon the history of all clues-word pairs.
+### GuessInputs
 
-request body schema:
+`GuessInputs` is a component that provides input fields for the user to enter clues for the Wordle guess. It accepts several props and uses state hooks to manage input values and styles.
 
-```tsx
-type WordleRequestItem = {
-	word: string;
-	clue: string;
-};
+#### Props
 
-type WordleRequest = WordleRequestItem[];
-```
+- `currentGuess`: The current word guess.
+- `indexNum`: The index number of the input set.
+- `lives`: The number of lives remaining.
+- `setError`: Function to set the error message.
+- `setCurrentGuess`: Function to set the current guess.
+- `setLoading`: Function to set the loading state.
+- `setSuccess`: Function to set the success state.
+- `setLives`: Function to set the lives count.
 
-response body schema:
+#### Functions
 
-```tsx
-type WordleResponse = {
-	guess: string;
-}
-```
+- `handleClueChange`: Handles changes in the clue input fields.
+- `compareGuess`: Compares the user's clue with the current guess and updates styles accordingly.
+- `handleSubmit`: Submits the current guess to the API and processes the response.
+- `handleKeyUp`: Handles keyboard navigation between input fields.
+- `handleCloseModal`: Closes the success modal and triggers a new guess submission if the guess was correct.
 
-sample request:
+### WordleSolver
 
-```tsx
-[
-	{
-		"word": "serai",
-		"clue": "gxyxx"
-	}
-]
-```
+`WordleSolver` is the main component of the application. It manages the state of the application and renders the `GuessInputs` components.
 
-sample response:
+#### State
 
-```tsx
-{
-	"guess": "barye"
-}
-```
+- `currentGuess`: The current word guess.
+- `loading`: The loading state.
+- `error`: The error message.
+- `success`: The success state.
+- `lives`: The number of lives remaining.
 
-There is some level of validation on the request object. Attempts to pass invalid input will likely end in an error. Examples:
+#### Functions
 
-| Error | Example message |
-| --- | --- |
-| Empty request body | Invalid request: must have a valid state object as the HTTP body |
-| Request is not an array | Invalid request: state must be an array |
-| Passing in too many items (6 or more) | Invalid request: state must be an array with 0-5 items in it |
-| Array entry is not an object | Invalid request: state item at index 0 is not a valid object |
-| Array entry is missing 'word' field OR 'word' field is not a string OR 'word' field is not 5 characters long | Invalid request: state item at index 0 does not have a 'word' string property that is 5 characters long |
-| 'word' field is not 5 alpha (a-z, A-Z) characters | Invalid request: state item at index 0 has a 'word' string property with invalid characters |
-| Array entry is missing 'clue' field OR 'clue' field is not a string OR 'clue' field is not 5 characters long | Invalid request: state item at index 0 does not have a 'clue' string property that is 5 characters long |
-| 'clue' field is not 5 clue (g, G, y, Y, x, X) characters | Invalid request: state item at index 0 has a 'clue' string property with invalid characters |
-| The requested items eliminates all the words in the dictionary (i.e. not solvable) | Invalid request: state leaves no remaining words in the dictionary |
+- `fetchInitialGuess`: Fetches the initial guess from the API.
+- `handleSubmitBtn`: Handles the form submission and triggers the guess comparison in `GuessInputs`.
 
-## Project Details
+## API Integration
 
-In this repo, we've included a starter project with some of the technologies we use - React, Typescript, and Material UI.  The goal of the starter is to help accelerate the project and reduce the overall time commitment while focusing on the user experience requirements.  If you are comfortable with other libraries or methods of accomplishing functionality in the starter, please use what is comfortable for you.
+The application integrates with an external API to fetch word guesses. The API functions are imported from the `../api/api` module.
 
-To run this project, you can use `npm start`  This will run the app in development mode at http://localhost:3000
+- `fetchWordleResult`: Fetches the next word guess based on the user's clues.
 
-## Deployment Details
+## Styles
 
-We largely use Azure and below we'll cover deployment instructions using a free Azure account.  If you are comfortable deploying on other platforms (AWS, Netlify, etc), you are welcome to choose your own hosting provider.
+The application uses basic CSS for styling. The styles are imported from the `../index.css` file.
 
-### Azure Instructions
-Azure offers free services to all users as long as your usage remains below a quota. If you are not hosting anything in Azure yet, deploying your project there will be free. If you are using Azure already and have usage exceeding your free quota, deploying your project should only add pennies of cost to your monthly bill.
+## Key Design Choices and Implementation
 
-The instructions assume you are using this starter project as the basis for your project. You may need to adjust them if you are using a different framework.
+### Design Choices
 
-1. Create a free Azure account or use an existing Azure account.
-2. Create a **Storage Account** in your subscription.  Standard storage and Local Redundancy is sufficient.
-3. In the storage account, on the left nav, click **Data Management > Static Website**.
-4. Enable the static website feature and set both index document name and error document name to ```index.html```.
-5. In the left nav under **Data Storage > Containers**, click into the ```$web``` container.
-6. On your local machine, create a production React build with `npm run build`.
-7. Upload the contents of `/build` into the ```$web``` container such that ```index.html``` and the associated react files are at the root of the container.
-8. Go to the primary endpoint listed in the **Static Website** page
+1. **Component-Based Architecture**: The application is designed using React's component-based architecture. This allows for better separation of concerns and reusability of components. The primary components are `GuessInputs` and `WordleSolver`, each handling specific parts of the application's functionality.
 
-We are not expecting your submission to be hosted behind a custom domain; the Azure assigned domain (`https://example.z19.web.core.windows.net/`) is sufficient.
+2. **State Management**: State is managed using React's `useState` and `useEffect` hooks. This approach allows for easy tracking of the application's state and reactivity to user inputs and API responses.
 
-## Submission
+3. **User Interaction and Feedback**: The `GuessInputs` component provides an intuitive interface for users to enter their clues. Color-coded feedback (green, yellow, grey) is used to indicate the accuracy of each clue, enhancing the user experience.
 
-Please "reply all" to the thread that sent you this assessment invitation. In your reply, include the following:
-1. Github repo link of the project
-2. Link to the hosted web app
-3. In a few paragraphs, explain your key design choices and implementation. Include any notes you wish to let us know as we review your project.
+4. **API Integration**: The application fetches word guesses from an external API. This integration is crucial for providing real-time word suggestions based on user input. Error handling is implemented to manage failed API requests and inform the user accordingly.
 
+5. **Modular CSS**: Basic styling is applied using CSS, keeping the design simple and clean. The styles are modular and scoped to individual components, preventing global style conflicts.
 
+### Implementation Notes
+
+1. **Forward Refs**: The `GuessInputs` component uses `forwardRef` and `useImperativeHandle` to expose certain functions to the parent component (`WordleSolver`). This allows the parent to trigger functions like `compareGuess` and `handleSubmit` within the child component.
+
+2. **Keyboard Navigation**: The `handleKeyUp` function in `GuessInputs` manages keyboard navigation, allowing users to move between input fields using the Enter and Backspace keys. This enhances the usability of the input fields.
+
+3. **Conditional Rendering**: Conditional rendering is used extensively to manage different states of the application (loading, error, success). This ensures that users are provided with appropriate feedback at each stage of the interaction.
+
+4. **Modals for Success Feedback**: A modal is displayed when the correct word is guessed, providing a clear and engaging success message to the user.
+---
+
+This README file provides a comprehensive overview of the Wordle Solver application, including installation instructions, component descriptions, design choices, and implementation details. If you have any questions or need further assistance, please feel free to reach out.
